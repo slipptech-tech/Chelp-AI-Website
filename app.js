@@ -1,18 +1,19 @@
 (() => {
   'use strict';
 
-  const REPO = 'slipptech-tech/Chelp-AI';
+  const REPO = 'slipptech-tech/Chelp-AI-Website';
   const RELEASES_API = `https://api.github.com/repos/${REPO}/releases/latest`;
+  const RELEASE_BASE = `https://github.com/${REPO}/releases/download`;
 
   const FALLBACK = {
     version: 'v1.0.0',
     setup: {
-      href: 'downloads/Chelp-AI-Setup-1.0.0.exe',
-      name: 'Chelp AI Setup 1.0.0.exe',
+      href: `${RELEASE_BASE}/1.0.0/Chelp-AI-Setup-1.0.0.exe`,
+      name: 'Chelp-AI-Setup-1.0.0.exe',
       bytes: 87931783
     },
     portable: {
-      href: 'downloads/Chelp-AI.1.0.0-portable.zip',
+      href: `${RELEASE_BASE}/1.0.0/Chelp-AI.1.0.0-portable.zip`,
       name: 'Chelp-AI.1.0.0-portable.zip',
       bytes: 125725150
     }
@@ -30,7 +31,7 @@
   function prettyName(kind, version) {
     const bare = version.replace(/^v/, '');
     return kind === 'setup'
-      ? `Chelp AI Setup ${bare}.exe`
+      ? `Chelp-AI-Setup-${bare}.exe`
       : `Chelp-AI.${bare}-portable.zip`;
   }
 
