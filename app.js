@@ -16,6 +16,11 @@
       href: `${RELEASE_BASE}/1.0.0/Chelp-AI.1.0.0-portable.zip`,
       name: 'Chelp-AI.1.0.0-portable.zip',
       bytes: 125725150
+    },
+    linux: {
+      href: 'downloads/Chelp-AI-1.0.2-x64.tar.gz',
+      name: 'Chelp-AI-1.0.2-x64.tar.gz',
+      bytes: 115662852
     }
   };
 
@@ -30,9 +35,9 @@
 
   function prettyName(kind, version) {
     const bare = version.replace(/^v/, '');
-    return kind === 'setup'
-      ? `Chelp-AI-Setup-${bare}.exe`
-      : `Chelp-AI.${bare}-portable.zip`;
+    if (kind === 'setup') return `Chelp-AI-Setup-${bare}.exe`;
+    if (kind === 'linux') return `Chelp-AI-${bare}-x64.tar.gz`;
+    return `Chelp-AI.${bare}-portable.zip`;
   }
 
   function applyDownload(kind, data, version) {
@@ -58,6 +63,17 @@
   }
 
   function pickAsset(assets, kind) {
+    if (kind === 'linux') {
+      const linux = assets.filter((asset) => /\.(appimage|tar\.gz)$/i.test(asset.name || ''));
+      const match =
+        linux.find(
+          (asset) => /\.appimage$/i.test(asset.name) && /x86_64|amd64|x64/i.test(asset.name)
+        ) ||
+        linux.find((asset) => /\.appimage$/i.test(asset.name)) ||
+        linux.find((asset) => /\.tar\.gz$/i.test(asset.name));
+      if (!match) return null;
+      return { href: match.browser_download_url, name: match.name, bytes: match.size };
+    }
     const pattern = kind === 'setup' ? /setup|installer/i : /portable/i;
     const extension = kind === 'setup' ? /\.exe$/i : /\.(zip|exe)$/i;
     const matches = assets.filter(
@@ -94,11 +110,13 @@
         const version = tag.startsWith('v') ? tag : `v${tag}`;
         const setup = pickAsset(release.assets, 'setup');
         const portable = pickAsset(release.assets, 'portable');
-        if (!setup && !portable) throw new Error('No download assets');
+        const linux = pickAsset(release.assets, 'linux');
+        if (!setup && !portable && !linux) throw new Error('No download assets');
 
         applyVersion(version, 'github');
         if (setup) applyDownload('setup', setup, version);
         if (portable) applyDownload('portable', portable, version);
+        if (linux) applyDownload('linux', linux, version);
 
         const link = $('[data-release-link]');
         if (link) {
@@ -113,6 +131,7 @@
         applyVersion(FALLBACK.version, 'local');
         applyDownload('setup', FALLBACK.setup, FALLBACK.version);
         applyDownload('portable', FALLBACK.portable, FALLBACK.version);
+        applyDownload('linux', FALLBACK.linux, FALLBACK.version);
       })
       .finally(() => clearTimeout(timeout));
   }

@@ -1507,7 +1507,7 @@ a:focus-visible {
 
 .download-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -1552,6 +1552,11 @@ a:focus-visible {
   width: 19px;
   height: 19px;
   fill: currentColor;
+}
+
+.dl-icon svg.dl-icon-tux {
+  width: 22px;
+  height: 22px;
 }
 
 .dl-icon-ghost {
@@ -1867,6 +1872,10 @@ html.js .reveal.is-visible {
 
   .feature-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .download-grid {
+    grid-template-columns: 1fr;
   }
 
   .faq-wrap {
