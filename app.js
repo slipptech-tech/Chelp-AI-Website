@@ -18,11 +18,14 @@
       bytes: 125725150
     },
     linux: {
-      href: 'downloads/Chelp-AI-1.0.2-x64.tar.gz',
+      href: `${RELEASE_BASE}/1.0.2/Chelp-AI-1.0.2-x64.tar.gz`,
       name: 'Chelp-AI-1.0.2-x64.tar.gz',
       bytes: 115662852
     }
   };
+
+  const DOWNLOAD_PARAM = 'dl';
+  const DOWNLOAD_KINDS = { windows: 'setup', setup: 'setup', portable: 'portable', linux: 'linux' };
 
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -91,9 +94,33 @@
     };
   }
 
+  function requestedKind() {
+    const value = new URLSearchParams(window.location.search).get(DOWNLOAD_PARAM);
+    if (!value) return null;
+    return DOWNLOAD_KINDS[value.toLowerCase()] || null;
+  }
+
+  function startDownload(kind) {
+    const button = $(`[data-download="${kind}"]`);
+    if (!button || !button.href || button.href.endsWith('#')) return;
+    const link = document.createElement('a');
+    link.href = button.href;
+    link.rel = 'noreferrer';
+    link.download = button.getAttribute('download') || '';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete(DOWNLOAD_PARAM);
+    window.history.replaceState({}, '', `${url.pathname}${url.hash}`);
+  }
+
   function loadRelease() {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
+    const autoKind = requestedKind();
+    if (autoKind) startDownload(autoKind);
 
     fetch(RELEASES_API, {
       headers: { Accept: 'application/vnd.github+json' },
